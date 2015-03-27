@@ -53,11 +53,25 @@ Vagrant.configure('2') do |config|
     v.vm.provider :docker do |d|
       d.image = 'johnnyt/nginx-push-stream:latest'
       #d.build_dir = 'nginx_push_stream'
+      d.name = 'nginx'
       d.link 'nsqd:nsqd'
       d.ports = ['49280:80']
       d.has_ssh = false
       d.volumes = ['/vagrant/etc/nginx:/etc/nginx']
       d.cmd =  ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;", "-c", "/vagrant/etc/nginx/nginx.conf"]
+
+      vagrant_host d
+    end
+  end
+
+  config.vm.define :nsq_to_http do |v|
+    v.vm.provider :docker do |d|
+      d.image = 'ploxiln/nsq-utils:0.3.0'
+      d.has_ssh = false
+      d.create_args = ['--volumes-from','nsq_data']
+      d.link 'nsqd:nsqd'
+      d.link 'nginx:nginx'
+      d.cmd  = ['/bin/nsq_to_http', '--nsqd-tcp-address=nsqd:4150', '--topic=chat', '--post=http://nginx/pub2?id=example']
 
       vagrant_host d
     end
