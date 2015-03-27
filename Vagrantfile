@@ -28,7 +28,7 @@ Vagrant.configure('2') do |config|
     v.vm.provider :docker do |d|
       d.name = 'nsqd'
       d.image = 'ploxiln/nsq:0.3.0'
-      d.ports = ['4150:4150','4151:4151']
+      d.ports = ['49250:4150','49251:4151']
       d.has_ssh = false
       d.create_args = ['--volumes-from','nsq_data']
 
@@ -41,7 +41,7 @@ Vagrant.configure('2') do |config|
       d.image = 'ploxiln/nsq:0.3.0'
       d.cmd  = ['/bin/nsqadmin', '--nsqd-http-address=nsqd:4151']
       d.link 'nsqd:nsqd'
-      d.ports = ['49171:4171']
+      d.ports = ['49271:4171']
       d.has_ssh = false
       d.create_args = ['--volumes-from','nsq_data']
 
@@ -54,7 +54,7 @@ Vagrant.configure('2') do |config|
       #d.image = 'johnnyt/nginx-push-stream:latest'
       d.build_dir = 'nginx_push_stream'
       d.link 'nsqd:nsqd'
-      d.ports = ['49080:80']
+      d.ports = ['49280:80']
       d.has_ssh = false
       d.volumes = ['/vagrant/etc/nginx:/etc/nginx']
       d.cmd =  ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;", "-c", "/vagrant/etc/nginx/nginx.conf"]

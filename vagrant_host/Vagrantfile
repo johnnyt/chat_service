@@ -119,7 +119,7 @@ Vagrant.configure("2") do |config|
       ip = "172.17.8.#{i+100}"
       config.vm.network :private_network, ip: ip
 
-      (49000..49999).each do |port|
+      (49200..49999).each do |port|
         config.vm.network :forwarded_port, :host => port, :guest => port
       end
 
