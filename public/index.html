@@ -1,132 +1,105 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <title>Chat - Push Stream Module Example</title>
-    <style type="text/css">
-      form p { min-height: 20px;}
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>Chat Client</title>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/webfont/1.5.10/webfont.js"></script>
+    <script>(function () { WebFont.load({ google: { families: ['Raleway'] } }) })()</script>
+
+    <link rel="stylesheet" href="css/normalize.css" media="all">
+    <link rel="stylesheet" href="css/skeleton.css" media="all">
+
+    <style>
+      .container {
+        margin-top: 20px;
+      }
     </style>
-</head>
-<body>
-    <form action="/pub" method="POST">
-        <p>
-            <span style="display: block; float: left; width: 55px;">mode:</span>
-            <span id="mode"></span>
-        </p>
-        <p>
-            <span style="display: block; float: left; width: 55px;">satus:</span>
-            <span class="online" style="display:none; color:green">online</span>
-            <span class="offline" style="display:block; color:red">offline</span>
-        </p>
-        <p>
-            <label for="room">Room:</label>
-            <input type="text" name="room" value="example" id="room" />
-        </p>
-        <p>
-            <label for="nick">Nick:</label>
-            <input type="text" name="nick" value="" id="nick" />
-        </p>
-        <p>
-            <label for="chat">Chat:</label>
-            <textarea name="chat" rows="8" cols="40" id="chat" readonly="readonly"></textarea>
-        </p>
-        <p>
-            <label for="message">Text:</label>
-            <textarea name="message" rows="2" cols="40" id="message"></textarea>
-        </p>
-        <p><input type="submit" value="Send" id="sendButton"/></p>
-    </form>
-    <p><input type="button" value="Show Log" id="showLog"/><input type="button" value="Hide Log" id="hideLog" style="display:none"/></p>
-    <div id="log" style="width:800px;height:200px;display:none;"></div>
+  </head>
 
-    <script src="/js/jquery.min.js" type="text/javascript" language="javascript" charset="utf-8"></script>
-    <script src="/js/pushstream.js" type="text/javascript" language="javascript" charset="utf-8"></script>
-    <script type="text/javascript" language="javascript" charset="utf-8">
-    // <![CDATA[
-    PushStream.LOG_LEVEL = 'debug';
-    var pushstream = new PushStream({
-      host: window.location.hostname,
-      port: window.location.port,
-      modes: "websocket|eventsource|stream"
-    });
-    pushstream.onmessage = _manageEvent;
-    pushstream.onstatuschange = _statuschanged;
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <form id="chat-form">
+            <div class="row">
+              <div class="ten columns">
+                <input class="u-full-width" id="chat-message" type="text" placeholder="Message..." autofocus>
+              </div>
 
-    function onSendText() {
-      $("#message").val('');
-    };
+              <div class="two columns">
+                <input class="button u-full-width" type="submit" value="Send">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
 
-    function _manageEvent(eventMessage) {
-      var chat = $("#chat");
-      if (eventMessage != '') {
-        var values = $.parseJSON(eventMessage);
-        var line = values.nick + ': ' + values.text.replace(/\\r/g, '\r').replace(/\\n/g, '\n');
-        if (chat.val() == '') {
-          chat.val(line);
-        } else {
-          chat.val(chat.val() + '\n' + line);
+      <div class="row">
+        <table class="u-full-width">
+          <thead>
+            <tr>
+              <th>Nickname</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+
+          <tbody id="chat-list"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="js/pushstream.js"></script>
+    <script>
+      (function () {
+        function addChatRow(data) {
+          var row = [
+            '<tr>',
+            '  <td>' + data.nick + '</td>',
+            '  <td>' + data.text + '</td>',
+            '</tr>'
+          ].join('\n')
+
+          document
+            .getElementById('chat-list')
+            .innerHTML += row
         }
 
-        var lines = chat.val().split('\n');
-        if (lines.length > 100) {
-          chat.val(lines.slice(-100).join('\n'));
+        window.pushstream = new PushStream({
+          host: 'lh',
+          port: 49280,
+          modes: 'websocket'
+        })
+
+        pushstream.onerror = function (e) {
+          console.log(e.type)
         }
-      }
-      chat.scrollTop(chat[0].scrollHeight - chat.height());
-    };
 
-    function _statuschanged(state) {
-      if (state == PushStream.OPEN) {
-        $(".offline").hide();
-        $(".online").show();
-        $("#mode").html(pushstream.wrapper.type);
-      } else {
-        $(".offline").show();
-        $(".online").hide();
-        $("#mode").html("");
-      }
-    };
+        pushstream.onmessage = function (data, id, channel) {
+          var data = JSON.parse(data)
 
-    function _connect(channel) {
-      pushstream.removeAllChannels();
-      try {
-        pushstream.addChannel(channel);
-        pushstream.connect();
-      } catch(e) {alert(e)};
+          addChatRow(data)
+        }
+        
+        pushstream.addChannel('example')
+        
+        pushstream.connect()
 
-      $("#chat").val('');
-    }
+        document
+          .getElementById('chat-form')
+          .addEventListener('submit', function (e) {
+            e.preventDefault()
 
-    $("#sendButton").click(function(){
-      if (($("#nick").val() != "") && ($("#message").val() != "") && ($("#room").val() != "")) {
-        pushstream.sendMessage('{"nick":"' + $("#nick").val() + '", "text":"' + $("#message").val().replace(/\r/g, '\\\\r').replace(/\n/g, '\\\\n') + '"}', onSendText);
-      } else {
-        alert("nick, room and text are required");
-      }
+            var chatMessageInput = document.getElementById('chat-message')
+            var text = chatMessageInput.value
 
-      return false;
-    });
+            if (!text) return
 
-    $("#room").change(function(){
-      _connect($("#room").val());
-    });
+            pushstream.sendMessage(JSON.stringify({ nick: 'B.', text: text }))
 
-    $("#showLog").click(function(){
-      $("#log").html('<textarea id="Log4jsLogOutput" rows="10" cols="100"></textarea>').show();
-      $("#showLog").hide();
-      $("#hideLog").show();
-    });
-
-    $("#hideLog").click(function(){
-      $("#Log4jsLogOutput").remove();
-      $("#log").html('').hide();
-      $("#hideLog").hide();
-      $("#showLog").show();
-    });
-
-    _connect($("#room").val());
-    // ]]>
+            chatMessageInput.value = ''
+          }, false)
+      })()
     </script>
-</body>
+  </body>
 </html>
