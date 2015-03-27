@@ -51,8 +51,8 @@ Vagrant.configure('2') do |config|
 
   config.vm.define :nginx do |v|
     v.vm.provider :docker do |d|
-      #d.image = 'johnnyt/nginx-push-stream:latest'
-      d.build_dir = 'nginx_push_stream'
+      d.image = 'johnnyt/nginx-push-stream:latest'
+      #d.build_dir = 'nginx_push_stream'
       d.link 'nsqd:nsqd'
       d.ports = ['49280:80']
       d.has_ssh = false
