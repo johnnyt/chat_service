@@ -1,12 +1,14 @@
+#!/usr/bin/env ruby
+require 'rubygems'
 require 'nsq'
 
 consumer = Nsq::Consumer.new(
-  nsqd: '127.0.0.1:49250',
+  nsqd: 'nsqd:4150',
   topic: 'input',
   channel: 'roobee'
 )
 
-producer = Nsq::Producer.new(nsqd: '127.0.0.1:49250', topic: 'chat')
+producer = Nsq::Producer.new(nsqd: 'nsqd:4150', topic: 'chat')
 
 producer.write('Ohhai')
 
