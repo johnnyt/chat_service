@@ -95,7 +95,16 @@
 
             if (!text) return
 
-            pushstream.sendMessage(JSON.stringify({ nick: 'B.', text: text }))
+
+function reqListener () {
+  console.log(this.responseText);
+}
+
+var oReq = new XMLHttpRequest();
+oReq.onload = reqListener;
+oReq.open("post", "/pub?topic=input", true);
+oReq.send( JSON.stringify({ nick: 'B.', text: text }) );
+            //pushstream.sendMessage(JSON.stringify({ nick: 'B.', text: text }))
 
             chatMessageInput.value = ''
           }, false)
