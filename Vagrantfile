@@ -19,7 +19,6 @@ Vagrant.configure('2') do |config|
       d.volumes = ['/data']
       d.has_ssh = false
       d.remains_running = false
-
       vagrant_host d
     end
   end
@@ -31,7 +30,6 @@ Vagrant.configure('2') do |config|
       d.ports = ['49250:4150','49251:4151']
       d.has_ssh = false
       d.create_args = ['--volumes-from','nsq_data']
-
       vagrant_host d
     end
   end
@@ -44,7 +42,6 @@ Vagrant.configure('2') do |config|
       d.ports = ['49271:4171']
       d.has_ssh = false
       d.create_args = ['--volumes-from','nsq_data']
-
       vagrant_host d
     end
   end
@@ -52,14 +49,13 @@ Vagrant.configure('2') do |config|
   config.vm.define :nginx do |v|
     v.vm.provider :docker do |d|
       d.image = 'johnnyt/nginx-push-stream:latest'
-      #d.build_dir = 'nginx_push_stream'
+      #d.build_dir = 'nginx'
       d.name = 'nginx'
       d.link 'nsqd:nsqd'
       d.ports = ['49280:80']
       d.has_ssh = false
-      d.volumes = ['/vagrant/etc/nginx:/etc/nginx']
-      d.cmd =  ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;", "-c", "/vagrant/etc/nginx/nginx.conf"]
-
+      d.volumes = ['/vagrant/nginx:/etc/nginx']
+      d.cmd =  ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;", "-c", "/vagrant/nginx/nginx.conf"]
       vagrant_host d
     end
   end
@@ -72,7 +68,6 @@ Vagrant.configure('2') do |config|
       d.link 'nsqd:nsqd'
       d.link 'nginx:nginx'
       d.cmd  = ['/bin/nsq_to_http', '--nsqd-tcp-address=nsqd:4150', '--topic=chat', '--post=http://nginx/pub2?id=example']
-
       vagrant_host d
     end
   end
