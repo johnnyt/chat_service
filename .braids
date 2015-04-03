@@ -5,5 +5,12 @@
     "branch": "master",
     "squashed": true,
     "revision": "ae88e2338f6e27459ace8a23754afc5892c2c5be"
+  },
+  "nginx/nginx-push-stream-module": {
+    "url": "git://github.com/wandenberg/nginx-push-stream-module.git",
+    "remote": "master/braid/nginx/nginx-push-stream-module",
+    "branch": "master",
+    "squashed": true,
+    "revision": "be0ae92bc93eb3c3de2e6750dba9c7dd8288f4d2"
   }
 }
