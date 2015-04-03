@@ -79,12 +79,9 @@ Vagrant.configure('2') do |config|
 
   config.vm.define :echo_server do |v|
     v.vm.provider :docker do |d|
-      d.build_dir = 'ruby'
+      d.build_dir = 'node'
       d.has_ssh = false
       d.link 'nsqd:nsqd'
-      d.volumes = ['/vagrant/ruby:/usr/src/myapp']
-      d.cmd  = ['ruby', '/vagrant/ruby/echo_server.rb']
-
       vagrant_host d
     end
   end
